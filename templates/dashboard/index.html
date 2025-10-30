@@ -1,0 +1,169 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="page-container">
+    {% include 'dashboard/userbar.html' %}
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="section__content section__content--p30">
+            <div class="container-fluid">
+
+                <!-- STATISTICS OVERVIEW -->
+                <div class="row m-t-25">
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="overview-item overview-item--c1">
+                            <div class="overview__inner">
+                                <div class="overview-box clearfix">
+                                    <div class="icon">
+                                        <i class="fa fa-cubes"></i>
+                                    </div>
+                                    <div class="text">
+                                        <h2>{{ counts.products|intcomma }}</h2>
+                                        <span>Products</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="overview-item overview-item--c2">
+                            <div class="overview__inner">
+                                <div class="overview-box clearfix">
+                                    <div class="icon">
+                                        <i class="fa fa-tags"></i>
+                                    </div>
+                                    <div class="text">
+                                        <h2>{{ counts.categories|intcomma }}</h2>
+                                        <span>Categories</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="overview-item overview-item--c3">
+                            <div class="overview__inner">
+                                <div class="overview-box clearfix">
+                                    <div class="icon">
+                                        <i class="fa fa-shopping-cart"></i>
+                                    </div>
+                                    <div class="text">
+                                        <h2>{{ counts.orders|intcomma }}</h2>
+                                        <span>Orders</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="overview-item overview-item--c4">
+                            <div class="overview__inner">
+                                <div class="overview-box clearfix">
+                                    <div class="icon">
+                                        <i class="fa fa-users"></i>
+                                    </div>
+                                    <div class="text">
+                                        <h2>{{ counts.customers|intcomma }}</h2>
+                                        <span>Customers</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRODUCTS BY CATEGORY CHART -->
+                <div class="mt-5 text-center">
+                    <h3 class="title-2 m-b-40">Products by Category</h3>
+                    <canvas id="Chart1"></canvas>
+                </div>
+
+                <!-- TOP SOLD PRODUCTS TABLE -->
+                <div class="mt-5">
+                    <h3 class="text-center">Top Sold Products</h3>
+                    <div class="table-responsive m-b-40">
+                        <table class="table table-borderless table-data3">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Product Name</th>
+                                    <th>Sold Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for t in table_list %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ t.title }}</td>
+                                    <td>{{ t.count }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">No sales data available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function ($) {
+    try {
+        var ctx = document.getElementById("Chart1");
+        if (ctx) {
+            ctx.height = 150;
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for cp in categories_products %}"{{ cp.category }}",{% endfor %}],
+                    datasets: [{
+                        label: "Number of Products",
+                        data: [{% for cp in categories_products %}{{ cp.product }},{% endfor %}],
+                        borderColor: "rgba(0, 128, 0, 0.9)",
+                        borderWidth: 0,
+                        backgroundColor: "rgba(0, 128, 0, 0.5)"
+                    }]
+                },
+                options: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            fontFamily: 'Poppins'
+                        }
+                    },
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                fontFamily: "Poppins"
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                fontFamily: "Poppins"
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.log(error);
+    }
+})(jQuery);
+</script>
+{% endblock %}
