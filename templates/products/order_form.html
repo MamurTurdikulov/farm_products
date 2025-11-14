@@ -1,0 +1,29 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Place Order</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, textarea, select { width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:4px; }
+    button { padding:10px 16px; background:#007bff; color:#fff; border:none; border-radius:5px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <h1>Place an Order</h1>
+  {% if messages %}
+    <ul>
+      {% for m in messages %}
+        <li>{{ m }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit Order</button>
+  </form>
+  <p><a href="{% url 'products:product_list' %}">Back to products</a></p>
+</body>
+</html>

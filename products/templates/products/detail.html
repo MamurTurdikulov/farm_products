@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} - Farm Products{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <a href="{% url 'product_list' %}" class="btn btn-link">&larr; Back to products</a>
+  <div class="row">
+    <div class="col-md-8">
+      <h1>{{ product.name }}</h1>
+      <p class="text-muted">{{ product.category.name if product.category else '' }}</p>
+      <p>{{ product.description }}</p>
+      <p><strong>Price:</strong> {{ product.price }} / kg</p>
+      <p><strong>Available:</strong> {{ product.available_kilos }} kg</p>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h5>Place order</h5>
+        <form method="post" action="#">
+          {% csrf_token %}
+          <div class="mb-2">
+            <label class="form-label">Kilos</label>
+            <input type="number" step="0.1" name="kilos" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Note</label>
+            <textarea name="note" class="form-control"></textarea>
+          </div>
+          <button class="btn btn-success w-100" type="submit">Order</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
