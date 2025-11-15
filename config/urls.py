@@ -12,6 +12,7 @@ router.register(r'customers', CustomerViewSet, basename='customer')
 router.register(r'orders', OrderViewSet, basename='order')
 
 urlpatterns = [
+    path('', include('products.frontend_urls')),
     path('admin/', admin.site.urls),
     path('api/', include((router.urls, 'api'))),
 ]
