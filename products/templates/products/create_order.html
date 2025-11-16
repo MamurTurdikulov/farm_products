@@ -1,104 +1,51 @@
-{% load static %}
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Farm Products</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f9f9f9;
-    }
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-top: 20px;
-    }
-    .card {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 12px;
-      background: #fff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      transition: transform 0.2s ease;
-    }
-    .card:hover {
-      transform: scale(1.02);
-    }
-    .card img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      border-radius: 6px;
-      background: #eee;
-    }
-    .price {
-      font-weight: bold;
-      margin-top: 8px;
-      color: #28a745;
-    }
-    .quantity {
-      font-weight: bold;
-      margin-top: 4px;
-      color: #007bff;
-    }
-    .order-btn {
-      display:inline-block;
-      margin-top:10px;
-      padding:8px 14px;
-      background:#28a745;
-      color:#fff;
-      text-decoration:none;
-      border-radius:4px;
-      text-align:center;
-      transition: background 0.2s ease;
-    }
-    .order-btn:hover {
-      background:#218838;
-    }
-    .out-of-stock {
-      background: #dc3545;
-      color: white;
-      display: inline-block;
-      margin-top: 10px;
-      padding: 8px 14px;
-      border-radius: 4px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Available Farm Products</h1>
+{% extends "products/base.html" %}
+{% block title %}Order — {{ product.name }}{% endblock %}
 
-  <div class="grid">
-    {% for p in products %}
-      <div class="card">
-        {% if p.image %}
-          <img src="{{ p.image.url }}" alt="{{ p.name }}">
-        {% else %}
-          <img src="{% static 'products/no_image_available.png' %}" alt="No image available">
-        {% endif %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4 class="card-title mb-3">Order {{ product.name }}</h4>
+        <div class="row">
+          <div class="col-md-4">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+            {% else %}
+            <img src="https://via.placeholder.com/300" class="img-fluid rounded" alt="{{ product.name }}">
+            {% endif %}
+          </div>
+          <div class="col-md-8">
+            <p class="mb-1"><strong>Price:</strong> {{ product.price }} per kg</p>
+            <p class="mb-3"><strong>Available:</strong> {{ product.available_kilos }} kg</p>
 
-        <h3>{{ p.name }}</h3>
-        <p>{{ p.description|linebreaksbr }}</p>
+            <form method="post" class="mt-3">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="id_name" class="form-label">Your name</label>
+                <input id="id_name" class="form-control" name="name" required>
+              </div>
+              <div class="mb-3">
+                <label for="id_phone" class="form-label">Phone</label>
+                <input id="id_phone" class="form-control" name="phone" required>
+              </div>
+              <div class="mb-3">
+                <label for="id_kilos" class="form-label">Kilos to order</label>
+                <input id="id_kilos" class="form-control" name="kilos" type="number" min="1" max="{{ product.available_kilos }}" required>
+              </div>
+              <div class="mb-3">
+                <label for="id_note" class="form-label">Note (optional)</label>
+                <textarea id="id_note" class="form-control" name="note" rows="3"></textarea>
+              </div>
 
-        <div class="price">💰 Price: {{ p.price }} UZS per kg</div>
-        <div class="quantity">📦 Left: {{ p.quantity }} kg</div>
+              <button type="submit" class="btn btn-primary">Place order</button>
+              <a href="{{ product.get_absolute_url }}" class="btn btn-outline-secondary ms-2">Cancel</a>
+            </form>
 
-        {% if p.quantity > 0 %}
-          <a class="order-btn" href="{% url 'products:create_order' %}?product={{ p.id }}">🛒 Order</a>
-        {% else %}
-          <div class="out-of-stock">❌ Out of stock</div>
-        {% endif %}
+          </div>
+        </div>
       </div>
-    {% empty %}
-      <p>No products available.</p>
-    {% endfor %}
+    </div>
   </div>
-</body>
-</html>
+</div>
+{% endblock %}

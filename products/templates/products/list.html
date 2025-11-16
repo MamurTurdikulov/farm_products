@@ -1,66 +1,59 @@
-{% extends "base.html" %}
-{% block title %}Products - Farm Products{% endblock %}
+{% extends "products/base.html" %}
+{% block title %}Products — Farm Products{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-  <h1 class="mb-4">Available Products</h1>
+<div class="row align-items-center mb-3">
+  <div class="col-md-6">
+    <h1 class="h3">Available Products</h1>
+  </div>
+  <div class="col-md-6">
+    <form class="d-flex" method="get">
+      <input class="form-control me-2" type="search" placeholder="Search..." name="q" value="{{ query|default:'' }}">
+      <button class="btn btn-outline-primary" type="submit">Search</button>
+    </form>
+  </div>
+</div>
 
-  <!-- Search form -->
-  <form class="mb-3" method="get">
-    <div class="input-group">
-      <input
-        type="text"
-        name="q"
-        class="form-control"
-        placeholder="Search products..."
-        value="{{ query|default:'' }}"
-      >
-      <button class="btn btn-primary" type="submit">Search</button>
-    </div>
-  </form>
-
-  <div class="row">
-    {% for product in products %}
-    <div class="col-md-4 mb-4">
-      <div class="card h-100 shadow-sm">
-        {% if product.image %}
-        <img
-          src="{{ product.image.url }}"
-          class="card-img-top"
-          alt="{{ product.name }}"
-          style="object-fit: cover; height: 220px;"
-        >
-        {% endif %}
-
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">{{ product.name }}</h5>
-
-          <p class="card-text small text-muted mb-2">
-            {% if product.category %}
-              {{ product.category.name }}
-            {% endif %}
-          </p>
-
-          <p class="card-text">{{ product.description|truncatechars:100 }}</p>
-
-          <p class="mt-auto mb-2">
-            <strong>Price:</strong> {{ product.price }} / kg
-          </p>
-
-          <p class="mb-2">
-            <strong>Available:</strong> {{ product.available_kilos }} kg
-          </p>
-
-          <a href="{% url 'product_detail' product.pk %}" class="btn btn-outline-primary mt-2">View</a>
+<div class="row g-3">
+  {% for p in products %}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="row g-0">
+        <div class="col-4">
+          {% if p.image %}
+            <img src="{{ p.image.url }}" class="img-fluid rounded-start card-img-left" alt="{{ p.name }}">
+          {% else %}
+            <img src="https://via.placeholder.com/180" class="img-fluid rounded-start card-img-left" alt="{{ p.name }}">
+          {% endif %}
+        </div>
+        <div class="col-8">
+          <div class="card-body">
+            <h5 class="card-title">{{ p.name }}</h5>
+            <p class="card-text mb-1 small text-muted">{% if p.category %}{{ p.category.name }}{% endif %}</p>
+            <p class="card-text"><strong>{{ p.available_kilos }} kg</strong> — {{ p.price }} per kg</p>
+            <a href="{{ p.get_absolute_url }}" class="btn btn-sm btn-primary">View</a>
+            <a href="{% url 'order_create' p.pk %}" class="btn btn-sm btn-outline-success">Order</a>
+          </div>
         </div>
       </div>
     </div>
-    {% empty %}
-    <div class="col-12">
-      <div class="alert alert-warning text-center">
-        No products found.
-      </div>
-    </div>
-    {% endfor %}
   </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="alert alert-info">No products found.</div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="mt-4">
+  {% if is_paginated %}
+  <nav aria-label="Page navigation">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Previous</a></li>{% endif %}
+      <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+      {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next</a></li>{% endif %}
+    </ul>
+  </nav>
+  {% endif %}
 </div>
 {% endblock %}
