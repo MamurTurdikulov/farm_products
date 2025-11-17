@@ -1,0 +1,45 @@
+
+{% extends "products/base.html" %}
+{% block title %}Seller Dashboard — Farm Products{% endblock %}
+{% block content %}
+<h3>Seller Dashboard</h3>
+
+<h4>Pending Orders</h4>
+{% if pending_orders %}
+  <table class="table">
+    <thead><tr><th>#</th><th>Product</th><th>Kilos</th><th>Customer</th><th>Created</th></tr></thead>
+    <tbody>
+    {% for o in pending_orders %}
+      <tr>
+        <td>{{ o.pk }}</td>
+        <td>{{ o.product.name }}</td>
+        <td>{{ o.kilos_ordered }}</td>
+        <td>{{ o.customer.name }} {{ o.customer.surname }} ({{ o.customer.phone }})</td>
+        <td>{{ o.created_at }}</td>
+        <td>
+          <a class="btn btn-sm btn-success" href="{% url 'products:seller_order_approve' o.pk %}">Approve</a>
+          <a class="btn btn-sm btn-danger" href="{% url 'products:seller_order_cancel' o.pk %}">Cancel</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No pending orders.</p>
+{% endif %}
+
+<h4>Products</h4>
+<table class="table">
+<thead><tr><th>#</th><th>Name</th><th>Available (kg)</th><th>Price</th></tr></thead>
+<tbody>
+{% for p in products %}
+<tr>
+  <td>{{ p.pk }}</td>
+  <td>{{ p.name }}</td>
+  <td>{{ p.available_kilos }}</td>
+  <td>{{ p.price }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}
