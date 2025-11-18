@@ -1,6 +1,7 @@
 import os
 import dj_database_url
 from pathlib import Path
+from django.utils.timezone import activate
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -89,7 +90,22 @@ REST_FRAMEWORK = {
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+static_dir = BASE_DIR / "static"
+if not static_dir.exists():
+    static_dir.mkdir()
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+media_dir = BASE_DIR / "media"
+if not media_dir.exists():
+    media_dir.mkdir()
+
 CORS_ALLOW_ALL_ORIGINS = True
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+USE_TZ = True
+TIME_ZONE = "Asia/Tashkent"
