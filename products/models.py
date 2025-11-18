@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.core.exceptions import ValidationError
-
+from django.utils import timezone
 
 def validate_jpeg(file):
     """Validator that ensures uploaded file has a .jpeg extension."""
@@ -58,6 +58,7 @@ class Customer(models.Model):
     surname = models.CharField(max_length=200, blank=True, default="")
     phone = models.CharField(max_length=40, blank=True, default="")
     email = models.EmailField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True, default=timezone.now)
 
     class Meta:
         ordering = ["name"]
