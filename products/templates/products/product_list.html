@@ -1,0 +1,36 @@
+{% extends 'products/base.html' %}
+{% block title %}Products{% endblock %}
+
+{% block content %}
+<h2>Products</h2>
+<a href="{% url 'product_create' %}" class="btn btn-primary mb-3">Add Product</a>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Image</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for product in products %}
+    <tr>
+        <td><a href="{% url 'product_detail' product.id %}">{{ product.name }}</a></td>
+        <td>{{ product.category.name }}</td>
+        <td>{{ product.price }}</td>
+        <td>
+            {% if product.image %}
+                <img src="{{ product.image.url }}" width="80">
+            {% else %}
+                No image
+            {% endif %}
+        </td>
+        <td>
+            <a class="btn btn-sm btn-warning" href="{% url 'product_update' product.id %}">Edit</a>
+            <a class="btn btn-sm btn-danger" href="{% url 'product_delete' product.id %}">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
