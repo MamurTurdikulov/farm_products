@@ -1,14 +1,9 @@
 from django.urls import path
-from django.conf import settings
-from django.conf.urls.static import static
 from . import views
 
 urlpatterns = [
-    path("", views.product_list, name="product_list"),
-    path("products/<int:pk>/", views.product_detail, name="product_detail"),
-    path("products/<int:pk>/order/", views.order_create, name="order_create"),
-    path("customers/", views.customer_list, name="customer_list"),   # NEW
+    path("categories/", views.CategoryListAPIView.as_view(), name="category-list"),
+    path("products/", views.ProductListAPIView.as_view(), name="product-list"),
+    path("products/<int:pk>/", views.ProductDetailAPIView.as_view(), name="product-detail"),
+    path("orders/", views.OrderCreateAPIView.as_view(), name="order-create"),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
