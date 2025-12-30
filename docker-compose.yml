@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:15
+    container_name: farm_db
+    environment:
+      POSTGRES_DB: farm_db
+      POSTGRES_USER: farm_user
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    container_name: farm_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=farm_db
+      - DB_USER=farm_user
+      - DB_PASSWORD=root
+      - SECRET_KEY=dev-secret-key-change-in-prod
+      - DEBUG=1
+
+volumes:
+  postgres_data:
