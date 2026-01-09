@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:17
+    container_name: farm_db
+    environment:
+      POSTGRES_DB: farm_db
+      POSTGRES_USER: farm_user
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U farm_user -d farm_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    container_name: farm_web
+    command: >
+      sh -c "
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000
+      "
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_NAME: farm_db
+      DB_USER: farm_user
+      DB_PASSWORD: root
+      DB_PORT: 5432
+      SECRET_KEY: dev-secret-key-change-in-prod
+      DEBUG: '1'
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
