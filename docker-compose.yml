@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   db:
     image: postgres:17
@@ -16,30 +18,62 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7-alpine
+    container_name: farm_redis
+    ports:
+      - "6379:6379"
+
   web:
     build: .
     container_name: farm_web
     command: >
       sh -c "
+      python manage.py makemigrations &&
       python manage.py migrate &&
+      python manage.py collectstatic --noinput &&
       python manage.py runserver 0.0.0.0:8000
       "
     volumes:
       - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     ports:
       - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       DB_HOST: db
       DB_NAME: farm_db
       DB_USER: farm_user
       DB_PASSWORD: root
       DB_PORT: 5432
-      SECRET_KEY: dev-secret-key-change-in-prod
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: your-secret-key-change-in-production
       DEBUG: '1'
+      ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0
     restart: unless-stopped
+
+  celery:
+    build: .
+    container_name: farm_celery
+    command: celery -A config worker -l info
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    environment:
+      DB_HOST: db
+      DB_NAME: farm_db
+      DB_USER: farm_user
+      DB_PASSWORD: root
+      REDIS_URL: redis://redis:6379/0
 
 volumes:
   postgres_data:
+  static_volume:
+  media_volume:

@@ -1,39 +1,35 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'is_seller', 'is_customer']
+        fields = ('id', 'username', 'email', 'first_name', 'last_name',
+                  'user_type', 'phone', 'address', 'avatar')
+        read_only_fields = ('id',)
 
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    is_seller = serializers.BooleanField(default=False)
-    is_customer = serializers.BooleanField(default=True)
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=8)
+    password_confirm = serializers.CharField(write_only=True, min_length=8)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'is_seller', 'is_customer']
+        fields = ('username', 'email', 'password', 'password_confirm',
+                  'first_name', 'last_name', 'user_type', 'phone', 'address')
 
     def validate(self, data):
-        if not data.get('is_seller') and not data.get('is_customer'):
-            raise serializers.ValidationError("User must be at least seller or customer.")
+        if data['password'] != data['password_confirm']:
+            raise serializers.ValidationError("Passwords do not match")
         return data
 
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-            is_seller=validated_data['is_seller'],
-            is_customer=validated_data['is_customer']
-        )
+        validated_data.pop('password_confirm')
+        password = validated_data.pop('password')
+        user = User.objects.create(**validated_data)
+        user.set_password(password)
+        user.save()
         return user
-
-class LoginResponseSerializer(serializers.Serializer):
-    access = serializers.CharField()
-    refresh = serializers.CharField()
-    user = UserSerializer()

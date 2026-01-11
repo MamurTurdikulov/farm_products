@@ -1,16 +1,40 @@
 from rest_framework import serializers
-from .models import Product
-from accounts.models import User
+from .models import Category, Product, ProductImage
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    product_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+    def get_product_count(self, obj):
+        return obj.products.filter(is_active=True).count()
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = '__all__'
+
 
 class ProductSerializer(serializers.ModelSerializer):
-    seller_username = serializers.ReadOnlyField(source='seller.username')
+    seller_name = serializers.CharField(source='seller.username', read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'description', 'price_per_kg', 'total_quantity_kg', 'seller', 'seller_username']
-        read_only_fields = ['seller']
+        fields = '__all__'
+        read_only_fields = ('seller', 'created_at', 'updated_at')
 
-    def validate_total_quantity_kg(self, value):
-        if value < 0:
-            raise serializers.ValidationError("Quantity cannot be negative.")
-        return value
+
+class ProductCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('category', 'name', 'description', 'price', 'quantity', 'image', 'is_active')
+
+    def create(self, validated_data):
+        validated_data['seller'] = self.context['request'].user
+        return super().create(validated_data)
